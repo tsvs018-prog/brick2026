@@ -1,0 +1,6 @@
+{
+  "name": "Neon Breakout 打磚塊",
+  "description": "經典街機打磚塊遊戲，使用純 HTML5、CSS 與 JavaScript 打造。具備流暢打擊手感、道具掉落、連擊計分、炫麗粒子特效與五大關卡挑戰。",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

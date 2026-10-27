@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Neon Breakout - 經典打磚塊遊戲</title>
+    <meta name="description" content="經典霓虹風格打磚塊街機遊戲，使用原生 HTML5、CSS 與 JavaScript 打造。支援滑鼠/鍵盤/觸控、豐富道具、連擊音效與五種精選關卡。" />
+    <meta property="og:title" content="Neon Breakout - 經典打磚塊遊戲" />
+    <meta property="og:description" content="經典霓虹風格打磚塊街機遊戲，使用原生 HTML5、CSS 與 JavaScript 打造。" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body data-state="title">
+    <div id="app">
+      <main id="game-container">
+        <!-- Top HUD -->
+        <header id="hud" role="region" aria-label="遊戲資訊欄">
+          <div class="hud-cluster">
+            <div class="hud-stat">
+              <span class="hud-label">得分 SCORE</span>
+              <span id="score-val" class="hud-val cyan">0</span>
+            </div>
+            <div class="hud-stat">
+              <span class="hud-label">最高 HIGH</span>
+              <span id="highscore-val" class="hud-val gold">0</span>
+            </div>
+            <div class="hud-stat">
+              <span class="hud-label">關卡 STAGE</span>
+              <span id="stage-val" class="hud-val">1/5</span>
+            </div>
+          </div>
+
+          <!-- Active Powerups Dock -->
+          <div id="powerup-dock" aria-label="作用中道具"></div>
+
+          <div class="hud-cluster">
+            <div class="hud-stat">
+              <span class="hud-label">生命 LIVES</span>
+              <div id="lives-container" class="lives-container">
+                <span class="heart active">❤️</span>
+                <span class="heart active">❤️</span>
+                <span class="heart active">❤️</span>
+              </div>
+            </div>
+
+            <!-- Action buttons -->
+            <button id="btn-sound" class="icon-btn" aria-label="切換靜音" title="靜音/開音 (M)">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+              </svg>
+            </button>
+            <button id="btn-pause" class="icon-btn" aria-label="暫停遊戲" title="暫停 (P / Esc)">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="6" y="4" width="4" height="16"></rect>
+                <rect x="14" y="4" width="4" height="16"></rect>
+              </svg>
+            </button>
+          </div>
+        </header>
+
+        <!-- Canvas Playfield -->
+        <div id="canvas-wrapper">
+          <canvas id="game-canvas" width="800" height="600" tabindex="0" aria-label="打磚塊遊戲畫布"></canvas>
+
+          <!-- 1. Title Screen Modal -->
+          <div id="title-screen" class="game-overlay">
+            <div class="overlay-modal">
+              <div class="game-logo">
+                <h1>NEON BREAKOUT</h1>
+                <span class="sub-title">經典街機打磚塊</span>
+              </div>
+
+              <!-- Difficulty selector -->
+              <div class="difficulty-selector" role="radiogroup" aria-label="選擇難度">
+                <button type="button" class="diff-btn" data-diff="casual">休閒</button>
+                <button type="button" class="diff-btn active" data-diff="normal">一般</button>
+                <button type="button" class="diff-btn" data-diff="hardcore">專家</button>
+              </div>
+
+              <button id="btn-start" class="primary-btn" data-start="true">開始遊戲 START</button>
+
+              <div class="control-hints">
+                <p><strong>操作提示：</strong></p>
+                <p>滑鼠滑動 / 觸控滑動 / 方向鍵 <kbd>←</kbd> <kbd>→</kbd> 或 <kbd>A</kbd> <kbd>D</kbd> 控制球拍</p>
+                <p><kbd>Space 空白鍵</kbd> 或點擊：發球 / 發射雙管雷射</p>
+                <p><kbd>P</kbd> 暫停 · <kbd>M</kbd> 靜音</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Pause Screen Modal -->
+          <div id="pause-screen" class="game-overlay hidden">
+            <div class="overlay-modal">
+              <div class="game-logo">
+                <h1 style="font-size: 28px;">遊戲暫停 PAUSED</h1>
+              </div>
+              <button id="btn-resume" class="primary-btn">繼續遊戲 RESUME</button>
+              <button id="btn-restart" class="secondary-btn">重新開始 RESTART</button>
+              <button id="btn-to-title" class="secondary-btn">回到首頁 TITLE</button>
+            </div>
+          </div>
+
+          <!-- 3. Stage Clear Modal -->
+          <div id="stage-clear-screen" class="game-overlay hidden">
+            <div class="overlay-modal">
+              <div class="game-logo">
+                <h1 id="stage-clear-title" style="color: #00ff88;">STAGE CLEAR!</h1>
+                <span id="stage-clear-msg" class="sub-title">關卡完成！</span>
+              </div>
+              <p id="stage-clear-stats" style="margin-bottom: 20px; font-size: 15px; color: var(--text-muted);"></p>
+              <button id="btn-next-stage" class="primary-btn" data-start="true">進入下一關 NEXT</button>
+            </div>
+          </div>
+
+          <!-- 4. Game Over Modal -->
+          <div id="gameover-screen" class="game-overlay hidden">
+            <div class="overlay-modal">
+              <div class="game-logo">
+                <h1 id="gameover-title" style="color: #ff0055;">GAME OVER</h1>
+              </div>
+              <div id="gameover-stats" class="stats-box"></div>
+              <button id="btn-play-again" class="primary-btn" data-start="true">再玩一次 PLAY AGAIN</button>
+              <button id="btn-gameover-to-title" class="secondary-btn">回到主選單 MENU</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mobile Touch Bar -->
+        <footer id="mobile-touch-bar">
+          <button id="btn-touch-left" class="icon-btn" style="flex: 1; height: 44px; font-size: 18px;" aria-label="向左移動">◀ 向左</button>
+          <button id="btn-touch-action" class="primary-btn" style="flex: 1.5; height: 44px; margin-bottom: 0; font-size: 14px;" aria-label="發射或發球">⚡ 發球 / 射擊</button>
+          <button id="btn-touch-right" class="icon-btn" style="flex: 1; height: 44px; font-size: 18px;" aria-label="向右移動">向右 ▶</button>
+        </footer>
+      </main>
+    </div>
+
+    <!-- Pure vanilla JavaScript entry point -->
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
